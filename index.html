@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Roblox Avatar Finder</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 30px;
+      text-align: center;
+      background: #f4f4f4;
+    }
+    .search-box {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid #ccc;
+      border-radius: 30px;
+      overflow: hidden;
+      background: #fff;
+    }
+    input[type="text"] {
+      border: none;
+      outline: none;
+      padding: 10px 15px;
+      font-size: 16px;
+      width: 200px;
+    }
+    button {
+      background: none;
+      border: none;
+      padding: 10px 15px;
+      cursor: pointer;
+      color: #333;
+    }
+    .avatar-container {
+      margin-top: 20px;
+    }
+    .avatar-container img {
+      width: 50px;
+      height: 50px;
+      border-radius: 10px;
+      border: 2px solid #333;
+    }
+  </style>
+</head>
+<body>
+  <h1>Roblox Avatar Finder</h1>
+  <div class="search-box">
+    <input type="text" id="username" placeholder="Enter username..." />
+  </div>
+
+  <div class="avatar-container" id="avatar-container"></div>
+
+  <script>
+    let searchTimeout;
+
+    async function searchAvatar() {
+      const username = document.getElementById("username").value.trim();
+      const container = document.getElementById("avatar-container");
+      container.innerHTML = "";
+
+      if (!username) return;
+
+      try {
+        const res = await fetch('/get-avatar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username })
+        });
+
+        const data = await res.json();
+
+        if (data.imageUrl) {
+          const img = document.createElement('img');
+          img.src = data.imageUrl;
+          img.alt = `${username}'s avatar`;
+          container.appendChild(img);
+        } else {
+          container.textContent = 'Avatar not found.';
+        }
+      } catch (err) {
+        container.textContent = 'Failed to fetch avatar.';
+      }
+    }
+
+    // Auto-search with 1 second delay
+    document.getElementById("username").addEventListener("input", function() {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(searchAvatar, 1000);
+    });
+  </script>
+</body>
+</html>
